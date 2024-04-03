@@ -13,8 +13,10 @@ RUN apt-get update \
 ENV JAVA_HOME='/usr/lib/jvm/java-17-openjdk-amd64'
 ENV PATH=${JAVA_HOME}/bin:${PATH}
 
+# Definir la versión de Gradle (valor predeterminado)
+ARG GRADLE_VERSION=8.5
+
 # Descargar e instalar Gradle
-ENV GRADLE_VERSION=8.5
 RUN wget --no-verbose "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
     && unzip -d /opt gradle-${GRADLE_VERSION}-bin.zip \
     && rm gradle-${GRADLE_VERSION}-bin.zip \
@@ -25,7 +27,9 @@ RUN wget --no-verbose "https://services.gradle.org/distributions/gradle-${GRADLE
     && wget "https://repo1.maven.org/maven2/org/testng/testng/7.5.1/testng-7.5.1.jar" \
     && mv testng-7.5.1.jar /opt/gradle-${GRADLE_VERSION}/lib/plugins/ \
     && rm /opt/gradle-${GRADLE_VERSION}/lib/plugins/testng-6.3.1.jar \
-    && mv /opt/gradle-${GRADLE_VERSION}/lib/plugins/testng-7.5.1.jar /opt/gradle-${GRADLE_VERSION}/lib/plugins/testng-6.3.1.jar
+    && mv /opt/gradle-${GRADLE_VERSION}/lib/plugins/testng-7.5.1.jar /opt/gradle-${GRADLE_VERSION}/lib/plugins/testng-6.3.1.jar \
+    && wget --no-verbose "https://repo1.maven.org/maven2/org/apache/commons/commons-compress/1.26.0/commons-compress-1.26.0.jar" \
+    && mv commons-compress-1.26.0.jar /opt/gradle-${GRADLE_VERSION}/lib/plugins/commons-compress.jar
 
 # Configuracion variables de entorno de Gradle
 ENV GRADLE_HOME=/opt/gradle-${GRADLE_VERSION}
@@ -37,11 +41,11 @@ ENV REPOSITORIO=${REPOSITORIO}
 ENV TAG=${TAG}
 ENV NAV=${NAV}
 
-#Copiar los scripts de prueba al contenedor: 
-COPY app /opt
-
 #Agregar el directorio de trabajo donde se ejecutarán los comandos relacionados con Gradle y donde se encontrarán los archivos necesarios para la ejecución de las pruebas
 WORKDIR /opt
+
+#Copiar los scripts de prueba al contenedor: 
+COPY app /opt
 
 #ejecuta el framework
 RUN chmod +x entrypoint.sh
